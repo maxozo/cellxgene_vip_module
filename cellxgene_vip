@@ -1,0 +1,16 @@
+#/bin/bash
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+bold=$(tput bold)
+normal=$(tput sgr0)
+if [[ $1 == "-h" ]]; then
+    command echo "Run as: cellxgene launch /path/to/your/h5ad.h5ad" | sed "s/\${bold}/$(echo -e "\033[1m")/g; s/\${normal}/$(echo -e "\033[0m")/g"
+else
+    dir="$(dirname "$0")";
+    cmd="cellxgene";
+    cmd_exec="$cmd $@ --host 0.0.0.0 --port 3006"
+    hostmame_launch=$(hostname -I | xargs)
+    echo -e "\n\n##########\n!!!! When loaded browse cellxgene VIP on: http://$hostmame_launch:3006\n############\n"
+    singularity exec --bind /lustre --bind /nfs --bind /software --bind $PWD --cleanenv --containall /software/hgi/containers/yascp/cellxgene_vip.img /bin/bash -c "cd $PWD; $cmd_exec";
+    echo "Browse cellxgene VIP on: $hostmame_launch:$4"
+fi

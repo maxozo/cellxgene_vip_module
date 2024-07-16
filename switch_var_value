@@ -1,0 +1,25 @@
+#!/bin/bash
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+bold=$(tput bold)
+normal=$(tput sgr0)
+if [[ $1 == "-h" ]]; then
+    command echo "Run as: switch_var_value /path/to/your/h5ad.h5ad var_val_to_set_as_index -- Note that the file will be saved in whichever directory you run this from with the same name as the original file + a sufix that you renamed the index to." | sed "s/\${bold}/$(echo -e "\033[1m")/g; s/\${normal}/$(echo -e "\033[0m")/g"
+else
+    # Check if the correct number of arguments is provided
+    if [ "$#" -ne 2 ]; then
+        echo "Usage: $0 <h5ad_path> <var_name>"
+        exit 1
+    fi
+
+    # Assign the arguments to variables
+    H5AD_PATH=$1
+    VAR_NAME=$2
+
+    # Define the Singularity image and script paths
+    SINGULARITY_IMAGE="/software/hgi/containers/yascp/yascp.cog.sanger.ac.uk-public-singularity_images-nf_scrna_qc_v3.img.img"
+    SCRIPT_PATH="/software/hgi/containers/yascp/modules/cellxgene_mod/switch_var_value.py"
+
+    # Run the Singularity command with the provided arguments
+    singularity exec -B /lustre -B /software $SINGULARITY_IMAGE python $SCRIPT_PATH $H5AD_PATH $VAR_NAME
+fi
